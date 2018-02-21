@@ -151,7 +151,7 @@ download_catch_rates = function( survey="Eastern_Bering_Sea", add_zeros=TRUE, sp
   # http://www.afsc.noaa.gov/RACE/groundfish/survey_data/data.htm
   if( survey=="EBSBTS" ){
     # Names of pieces
-    files = c("1982_1984","1985_1989","1990_1994","1995_1999","2000_2004","2005_2008","2009_2012","2013_2016","2017")
+    files = c("1982_1984","1985_1989","1990_1994","1995_1999","2000_2004","2005_2008","2009_2012","2013_2016")
 
     # Loop through download pieces
     Downloaded_data = NULL
@@ -167,6 +167,7 @@ download_catch_rates = function( survey="Eastern_Bering_Sea", add_zeros=TRUE, sp
       }
     }
     # Load if locally available, and save if not
+
     Downloaded_data = load_or_save( Downloaded_data=Downloaded_data, localdir=localdir, name="EBSBTS_download")
 
     # Add TowID
@@ -246,16 +247,13 @@ download_catch_rates = function( survey="Eastern_Bering_Sea", add_zeros=TRUE, sp
   }
 
   ######################
-  # Add missing zeros
+  # Check for numeric columns stored as characters
   ######################
 
-  # Add zeros
-
   # fix characters in numeric columns
-
   for (i in 1:ncol(Data)){
 
-    possible_numeric = any(is.na(as.numeric(Data[,i])) == F) & is.factor(Data[,i]) == F
+    possible_numeric = any(is.na(as.numeric(Data[,i])) == F) & is.factor(Data[,i]) == F & is.numeric(Data[,i]) == F
 
     if (possible_numeric == T){
 
@@ -266,6 +264,14 @@ download_catch_rates = function( survey="Eastern_Bering_Sea", add_zeros=TRUE, sp
   }
 
   Data <- Data[is.na(Data$Lat) == F, ] # remove former header rows that were included in data
+
+
+
+  ######################
+  # Add missing zeros
+  ######################
+
+  # Add zeros
 
   if( add_zeros==TRUE & survey%in%c("WCGBTS","WCGHL","EBSBTS","GOABTS","AIBTS") ){
     DF = add_missing_zeros( data_frame=Data, unique_sample_ID_colname="TowID", sample_colname="Wt", species_subset=species_set, species_colname="Sci", Method="Fast", if_multiple_records="Combine", error_tol=error_tol)
